@@ -1,0 +1,11 @@
+{
+  "USERNAME_NULL": "El nombre de usuario requerido",
+  "USERNAME_SIZE": "El nombre de usuario debe tener min 4 y max 32 caracteres",
+  "EMAIL_NULL": "El E-mail es requerido",
+  "EMAIL_INVALID": "El E-mail debe ser valido",
+  "PASSWORD_NULL": "La contraseña es requerida",
+  "PASSWORD_SIZE": "La contraseña debe tener al menos 6 caracteres",
+  "PASSWORD_PATTERN": "La contraseña debe tener al menos 1 letra en mayuscula, 1 una letra en minuscula y 1 numero",
+  "EMAIL_IN_USE": "El E-mail esta en uso",
+  "USER_SUCCESS": "Usuario creado con exito"
+}
