@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { postUser } = require("../controllers/user.controller");
+const { postUser, activateUser } = require("../controllers/user.controller");
 const { check, validationResult } = require("express-validator");
 const userService = require("../services/user.service");
 
@@ -51,5 +51,6 @@ const validateUser = async (req, res, next) => {
 };
 
 router.post("/", validateUser, postUser);
+router.post("/token/:token", activateUser);
 
 module.exports = router;

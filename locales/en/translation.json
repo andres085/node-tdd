@@ -7,5 +7,8 @@
   "PASSWORD_SIZE": "Password must be at least 6 characters",
   "PASSWORD_PATTERN": "Password must have at least 1 uppercase letter, 1 lowercase letter and 1 number",
   "EMAIL_IN_USE": "E-mail in use",
-  "USER_SUCCESS": "User created"
+  "USER_SUCCESS": "User created",
+  "EMAIL_FAILURE": "E-mail Failure",
+  "ACCOUNT_ACTIVATION_SUCCESS": "The account was activated succesfully",
+  "ACCOUNT_ACTIVATION_FAILURE": "This account is either active or the token is invalid"
 }
