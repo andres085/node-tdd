@@ -1,8 +1,9 @@
 const userService = require("../services/user.service");
+const ValidationError = require("../errors/ValidationError");
 
-const postUser = async (req, res) => {
+const postUser = async (req, res, next) => {
   if (req.validationErrors) {
-    return res.status(400).json({ validationErrors: req.validationErrors });
+    return next(new ValidationError(req.validationErrors));
   }
   try {
     await userService.save(req.body);
@@ -11,22 +12,18 @@ const postUser = async (req, res) => {
       message: req.t("USER_SUCCESS"),
     });
   } catch (error) {
-    return res.status(502).json({
-      message: req.t(error.message),
-    });
+    next(error);
   }
 };
 
-const activateUser = async (req, res) => {
+const activateUser = async (req, res, next) => {
   try {
     await userService.activate(req.params);
     return res.status(200).json({
       message: req.t("ACCOUNT_ACTIVATION_SUCCESS"),
     });
   } catch (error) {
-    return res.status(400).json({
-      message: req.t(error.message),
-    });
+    next(error);
   }
 };
 
