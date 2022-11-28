@@ -16,6 +16,12 @@ const postUser = async (req, res, next) => {
   }
 };
 
+const getUsers = async (req, res, next) => {
+  const page = req.query.page && req.query.page > 0 ? +req.query.page : 0;
+  const users = await userService.getUsers(page);
+  res.send(users);
+};
+
 const activateUser = async (req, res, next) => {
   try {
     await userService.activate(req.params);
@@ -27,4 +33,4 @@ const activateUser = async (req, res, next) => {
   }
 };
 
-module.exports = { postUser, activateUser };
+module.exports = { postUser, activateUser, getUsers };

@@ -5,6 +5,8 @@ const errorHandler = (err, req, res, next) => {
     validationErrors = errors;
   }
   return res.status(status).json({
+    path: req.originalUrl,
+    timestamp: new Date().getTime(),
     message: req.t(message),
     validationErrors,
   });

@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "cross-env NODE_ENV=development nodemon index.js",
-    "test": "cross-env NODE_ENV=test jest --watchAll"
+    "test": "cross-env NODE_ENV=test jest --watchAll --runInBand"
   },
   "author": "Martinez Andres",
   "license": "ISC",
@@ -32,6 +32,7 @@
     "watchPlugins": [
       "jest-watch-typeahead/filename",
       "jest-watch-typeahead/testname"
-    ]
+    ],
+    "testEnvironment": "node"
   }
 }

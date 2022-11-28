@@ -32,6 +32,24 @@ const findByEmail = async (email) => {
   return await User.findOne({ where: { email } });
 };
 
+const getUsers = async (page = 0) => {
+  const pageSize = 10;
+  const totalUsersWithCount = await User.findAndCountAll({
+    where: { inactive: false },
+    attributes: ["id", "username", "email"],
+    limit: 10,
+    offset: page * pageSize,
+  });
+
+  const pages = Math.ceil(totalUsersWithCount.count / pageSize);
+  return {
+    content: totalUsersWithCount.rows,
+    page,
+    size: pageSize,
+    totalPages: pages,
+  };
+};
+
 const activate = async (data) => {
   const { token } = data;
   const user = await User.findOne({ where: { activationToken: token } });
@@ -47,4 +65,5 @@ module.exports = {
   save,
   findByEmail,
   activate,
+  getUsers,
 };

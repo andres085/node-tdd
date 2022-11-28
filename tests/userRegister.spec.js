@@ -17,6 +17,7 @@ const SMTPServer = require("smtp-server").SMTPServer;
 let lastMail;
 let server;
 let simulateSmtpFailure = false;
+
 beforeAll(async () => {
   server = new SMTPServer({
     authOptional: true,
@@ -245,6 +246,16 @@ describe("User Registration", () => {
 
     expect(users.length).toBe(0);
   });
+
+  it("returns Validation Failure message in error response body when validation fails", async () => {
+    const response = await postUser({
+      username: null,
+      email: "user1@mail.com",
+      password: "P4ssword",
+    });
+
+    expect(response.body.message).toBe("Validation Failure");
+  });
 });
 
 describe("Internationalization", () => {
@@ -259,6 +270,7 @@ describe("Internationalization", () => {
   const EMAIL_IN_USE = "El E-mail esta en uso";
   const USER_SUCCESS = "Usuario creado con exito";
   const EMAIL_FAILURE = "El E-mail es incorrecto";
+  const VALIDATION_FAILURE = "Error de validación";
 
   it.each([
     ["username", null, USERNAME_NULL],
@@ -308,6 +320,19 @@ describe("Internationalization", () => {
 
     const response = await postUser({ ...validUser }, { language: "es" });
     expect(response.body.message).toBe(EMAIL_FAILURE);
+  });
+
+  it(`returns ${VALIDATION_FAILURE} message translated to spanish in error response body when validation fails`, async () => {
+    const response = await postUser(
+      {
+        username: null,
+        email: "user1@mail.com",
+        password: "P4ssword",
+      },
+      { language: "es" }
+    );
+
+    expect(response.body.message).toBe(VALIDATION_FAILURE);
   });
 });
 
@@ -370,5 +395,48 @@ describe("Account activation", () => {
     const response = await request(app).post(`/api/1.0/users/token/${token}`).set("Accept-Language", language).send();
 
     expect(response.body.message).toBe(message);
+  });
+});
+
+describe("Error Model", () => {
+  it("returns path, timestamp, message and validationErrors in response when validation failure", async () => {
+    const response = await postUser({ ...validUser, username: null });
+    const body = response.body;
+
+    expect(Object.keys(body)).toEqual(["path", "timestamp", "message", "validationErrors"]);
+  });
+
+  it("returns path, timestamp and message in response when request fails other than validation error", async () => {
+    await postUser();
+    const token = "invalid-token";
+
+    const response = await request(app).post(`/api/1.0/users/token/${token}`).send();
+    const body = response.body;
+
+    expect(Object.keys(body)).toEqual(["path", "timestamp", "message"]);
+  });
+
+  it("returns path in error body", async () => {
+    await postUser();
+    const token = "invalid-token";
+
+    const path = `/api/1.0/users/token/${token}`;
+    const response = await request(app).post(`/api/1.0/users/token/${token}`).send();
+    const body = response.body;
+
+    expect(body.path).toEqual(path);
+  });
+
+  it("returns timestamp in miliseconds within 5 seconds value in error body", async () => {
+    await postUser();
+    const token = "invalid-token";
+
+    const nowInMiliSeconds = new Date().getTime();
+    const fiveSecondsLater = nowInMiliSeconds + 5 * 1000;
+    const response = await request(app).post(`/api/1.0/users/token/${token}`).send();
+    const body = response.body;
+
+    expect(body.timestamp).toBeGreaterThan(nowInMiliSeconds);
+    expect(body.timestamp).toBeLessThan(fiveSecondsLater);
   });
 });
