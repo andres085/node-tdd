@@ -1,5 +1,6 @@
 const userService = require("../services/user.service");
 const ValidationError = require("../errors/ValidationError");
+const UserNotFoundError = require("../errors/UserNotFound");
 
 const postUser = async (req, res, next) => {
   if (req.validationErrors) {
@@ -16,10 +17,19 @@ const postUser = async (req, res, next) => {
   }
 };
 
-const getUsers = async (req, res, next) => {
-  const page = req.query.page && req.query.page > 0 ? +req.query.page : 0;
-  const users = await userService.getUsers(page);
+const getUsers = async (req, res) => {
+  const { page, size } = req.pagination;
+  const users = await userService.getUsers(page, size);
   res.send(users);
+};
+
+const getUser = async (req, res, next) => {
+  try {
+    const userFound = await userService.getUser(req.params.id);
+    return res.status(200).json(userFound.dataValues);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 const activateUser = async (req, res, next) => {
@@ -33,4 +43,4 @@ const activateUser = async (req, res, next) => {
   }
 };
 
-module.exports = { postUser, activateUser, getUsers };
+module.exports = { postUser, activateUser, getUsers, getUser };

@@ -1,11 +1,11 @@
 {
   "database": {
-    "database": "hoaxify",
-    "username": "user",
-    "password": "userpassword",
-    "dialect": "sqlite",
-    "storage": "./test-database.sqlite",
-    "logging": false
+    "database": "postgres",
+    "username": "postgres",
+    "password": "postgres",
+    "dialect": "postgres",
+    "logging": false,
+    "port": 5433
   },
   "mail": {
     "host": "localhost",

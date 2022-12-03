@@ -11,5 +11,6 @@
   "EMAIL_FAILURE": "El E-mail es incorrecto",
   "ACCOUNT_ACTIVATION_SUCCESS": "La cuenta fue activada con exito",
   "ACCOUNT_ACTIVATION_FAILURE": "Esta cuenta esta activada o el token es invalido",
-  "VALIDATION_FAILURE": "Error de validación"
+  "VALIDATION_FAILURE": "Error de validación",
+  "USER_NOT_FOUND": "Usuario no encontrado"
 }

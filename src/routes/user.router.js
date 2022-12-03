@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { postUser, activateUser, getUsers } = require("../controllers/user.controller");
+const { postUser, activateUser, getUsers, getUser } = require("../controllers/user.controller");
 const { check, validationResult } = require("express-validator");
 const userService = require("../services/user.service");
+const pagination = require("../middlewares/pagination");
 
 const validateUser = async (req, res, next) => {
   await check("username")
@@ -53,6 +54,7 @@ const validateUser = async (req, res, next) => {
 router.post("/", validateUser, postUser);
 router.post("/token/:token", activateUser);
 
-router.get("/", getUsers);
+router.get("/", pagination, getUsers);
+router.get("/:id", pagination, getUser);
 
 module.exports = router;

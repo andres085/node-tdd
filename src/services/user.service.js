@@ -5,6 +5,7 @@ const emailService = require("../email/emailService");
 const sequelize = require("../config/database");
 const EmailError = require("../errors/EmailError");
 const InvalidTokenError = require("../errors/InvalidTokenError");
+const UserNotFound = require("../errors/UserNotFound");
 
 const generateToken = (length) => {
   return crypto.randomBytes(length).toString("hex").substring(0, length);
@@ -32,22 +33,29 @@ const findByEmail = async (email) => {
   return await User.findOne({ where: { email } });
 };
 
-const getUsers = async (page = 0) => {
-  const pageSize = 10;
+const getUsers = async (page = 0, size = 10) => {
   const totalUsersWithCount = await User.findAndCountAll({
     where: { inactive: false },
     attributes: ["id", "username", "email"],
-    limit: 10,
-    offset: page * pageSize,
+    limit: size,
+    offset: page * size,
   });
 
-  const pages = Math.ceil(totalUsersWithCount.count / pageSize);
+  const pages = Math.ceil(totalUsersWithCount.count / size);
   return {
     content: totalUsersWithCount.rows,
     page,
-    size: pageSize,
+    size,
     totalPages: pages,
   };
+};
+
+const getUser = async (id) => {
+  const user = await User.findOne({ where: { id, inactive: false }, attributes: ["id", "username", "email"] });
+  if (!user) {
+    throw new UserNotFound();
+  }
+  return user;
 };
 
 const activate = async (data) => {
@@ -66,4 +74,5 @@ module.exports = {
   findByEmail,
   activate,
   getUsers,
+  getUser,
 };
