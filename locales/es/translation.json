@@ -12,5 +12,8 @@
   "ACCOUNT_ACTIVATION_SUCCESS": "La cuenta fue activada con exito",
   "ACCOUNT_ACTIVATION_FAILURE": "Esta cuenta esta activada o el token es invalido",
   "VALIDATION_FAILURE": "Error de validación",
-  "USER_NOT_FOUND": "Usuario no encontrado"
+  "USER_NOT_FOUND": "Usuario no encontrado",
+  "AUTHENTICATION_FAILURE": "Credenciales incorrectas",
+  "INACTIVE_ACCOUNT": "La cuenta no esta activada",
+  "UNAUTHORIZED_USER_UPDATE": "No estas autorizado para actualizar este usuario"
 }

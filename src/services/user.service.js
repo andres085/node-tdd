@@ -3,9 +3,11 @@ const User = require("../models/User");
 const crypto = require("crypto");
 const emailService = require("../email/emailService");
 const sequelize = require("../config/database");
+const Sequelize = require("sequelize");
 const EmailError = require("../errors/EmailError");
 const InvalidTokenError = require("../errors/InvalidTokenError");
 const UserNotFound = require("../errors/UserNotFound");
+const ForbiddenError = require("../errors/ForbiddenError");
 
 const generateToken = (length) => {
   return crypto.randomBytes(length).toString("hex").substring(0, length);
@@ -30,12 +32,18 @@ const save = async (data) => {
 };
 
 const findByEmail = async (email) => {
-  return await User.findOne({ where: { email } });
+  return await User.findOne({ where: { email }, attributes: ["id", "username", "email", "password", "inactive"] });
 };
 
-const getUsers = async (page = 0, size = 10) => {
+const getUsers = async (page = 0, size = 10, authenticatedUser) => {
+  page = page < 0 ? 0 : page;
   const totalUsersWithCount = await User.findAndCountAll({
-    where: { inactive: false },
+    where: {
+      inactive: false,
+      id: {
+        [Sequelize.Op.not]: authenticatedUser ? authenticatedUser.id : 0,
+      },
+    },
     attributes: ["id", "username", "email"],
     limit: size,
     offset: page * size,
@@ -58,6 +66,14 @@ const getUser = async (id) => {
   return user;
 };
 
+const updateUser = async (id, body) => {
+  const updatedUser = await User.update(body, {
+    where: { id: id },
+  });
+
+  return updatedUser;
+};
+
 const activate = async (data) => {
   const { token } = data;
   const user = await User.findOne({ where: { activationToken: token } });
@@ -75,4 +91,5 @@ module.exports = {
   activate,
   getUsers,
   getUser,
+  updateUser,
 };

@@ -1,6 +1,6 @@
 const userService = require("../services/user.service");
 const ValidationError = require("../errors/ValidationError");
-const UserNotFoundError = require("../errors/UserNotFound");
+const ForbiddenError = require("../errors/ForbiddenError");
 
 const postUser = async (req, res, next) => {
   if (req.validationErrors) {
@@ -18,9 +18,10 @@ const postUser = async (req, res, next) => {
 };
 
 const getUsers = async (req, res) => {
+  const authenticatedUser = req.authenticatedUser;
   const { page, size } = req.pagination;
-  const users = await userService.getUsers(page, size);
-  res.send(users);
+  const users = await userService.getUsers(page, size, authenticatedUser);
+  return res.status(200).json(users);
 };
 
 const getUser = async (req, res, next) => {
@@ -28,7 +29,22 @@ const getUser = async (req, res, next) => {
     const userFound = await userService.getUser(req.params.id);
     return res.status(200).json(userFound.dataValues);
   } catch (error) {
-    return next(error);
+    next(error);
+  }
+};
+
+const updateUser = async (req, res, next) => {
+  const authenticatedUser = req.authenticatedUser;
+  const body = req.body;
+
+  try {
+    if (!authenticatedUser || authenticatedUser.id !== +req.params.id) {
+      throw new ForbiddenError("UNAUTHORIZED_USER_UPDATE");
+    }
+    await userService.updateUser(authenticatedUser.id, body);
+    return res.status(200).json();
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -43,4 +59,4 @@ const activateUser = async (req, res, next) => {
   }
 };
 
-module.exports = { postUser, activateUser, getUsers, getUser };
+module.exports = { postUser, activateUser, getUsers, getUser, updateUser };

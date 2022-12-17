@@ -2,25 +2,35 @@ const request = require("supertest");
 const app = require("../src/app");
 const sequelize = require("../src/config/database");
 const User = require("../src/models/User");
+const en = require("../locales/en/translation.json");
+const es = require("../locales/es/translation.json");
+const bcrypt = require("bcrypt");
 
 beforeAll(async () => {
-  return sequelize.sync({ force: true });
+  return await sequelize.sync({ force: true });
 });
 
 beforeEach(async () => {
-  return User.destroy({ truncate: true });
+  return await User.destroy({ truncate: true });
 });
 
-const getUsers = () => {
-  return request(app).get("/api/1.0/users");
+const getUsers = (options = {}) => {
+  const agent = request(app).get("/api/1.0/users");
+  if (options.auth) {
+    const { email, password } = options.auth;
+    agent.auth(email, password);
+  }
+  return agent;
 };
 
 const addUsers = async (activeUserCount, inactiveUserCount = 0) => {
+  const hashedPassword = await bcrypt.hash("P4ssword", 10);
   for (let i = 0; i < activeUserCount + inactiveUserCount; i++) {
     await User.create({
       username: `user${i + 1}`,
       email: `user${i + 1}@mail.com`,
       inactive: i >= activeUserCount,
+      password: hashedPassword,
     });
   }
 };
@@ -133,6 +143,15 @@ describe("Listing Users", () => {
     expect(body.size).toBe(10);
     expect(body.page).toBe(0);
   });
+
+  it("returns users page without logged in user when request has valid authorization", async () => {
+    await addUsers(11);
+
+    const response = await getUsers({ auth: { email: "user1@mail.com", password: "P4ssword" } });
+    const body = response.body;
+
+    expect(body.totalPages).toBe(1);
+  });
 });
 
 describe("Get User", () => {
@@ -147,8 +166,8 @@ describe("Get User", () => {
   });
 
   it.each([
-    ["Usuario no encontrado", "es"],
-    ["User not found", "en"],
+    [es.USER_NOT_FOUND, "es"],
+    [en.USER_NOT_FOUND, "en"],
   ])("returns %s for unknown user when language is set to %s", async (message, language) => {
     const response = await getUser().set("Accept-Language", language);
 
@@ -172,7 +191,7 @@ describe("Get User", () => {
       inactive: false,
     });
 
-    const response = await getUser(user.id);
+    const response = await getUser(user.dataValues.id);
 
     expect(response.status).toBe(200);
   });
